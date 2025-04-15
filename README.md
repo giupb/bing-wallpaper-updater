@@ -1,87 +1,94 @@
-# Bing Daily Wallpaper for macOS
+# 🌅 Bing Wallpaper Updater (macOS)
 
-Automatically updates your macOS wallpaper once a day using Bing's daily image.
-
-This script and launch agent will:
-- Download Bing's daily wallpaper in UHD
-- Save it in your `~/Pictures/Bing Wallpapers/` folder with the correct title
-- Set it as your desktop wallpaper (for all spaces)
-- Run automatically each day at 7:30 AM or when you wake your Mac — but only once per day
+Automatically fetch and set the daily Bing wallpaper as your desktop background on macOS. Uses `launchd` to run once per day.
 
 ---
 
-## 📁 Repository Contents
+## 🚀 Features
 
-- `change_wallpaper.sh`: The shell script that downloads and sets the wallpaper.
-- `com.user.wallpaper-change.plist`: A `launchd` job configuration file to automate the script daily.
-
+- Downloads the daily Bing wallpaper in UHD
+- Sets it as your macOS desktop background
+- Runs automatically every day at a chosen time
+  
 ---
 
-## ⚙️ Setup Instructions
+## 📦 Requirements
 
-1. **Move the Files to the Appropriate Locations**
-
-   ```bash
-   mkdir -p ~/Library/Scripts
-   mkdir -p ~/Library/LaunchAgents
-   ```
-
-   Then move the files:
-
-   ```bash
-   mv change_wallpaper.sh ~/Library/Scripts/
-   mv com.user.wallpaper-change.plist ~/Library/LaunchAgents/
-   ```
-
-2. **Edit File Paths in Both Files**
-
-   - Open the `.plist` file in a text editor:
-     ```bash
-     open -a TextEdit ~/Library/LaunchAgents/com.user.wallpaper-change.plist
-     ```
-     Update the `<string>` under `ProgramArguments` to reflect the correct path:
-     ```xml
-     <string>/Users/your-username/Library/Scripts/change_wallpaper.sh</string>
-     ```
-
-   - Open the `.sh` file in a text editor:
-     ```bash
-     open -a TextEdit ~/Library/Scripts/change_wallpaper.sh
-     ```
-     And update the two variables at the top:
-     ```bash
-     LAST_UPDATE_FILE="/Users/your-username/Library/Application Support/BingWallpaper/.last_wallpaper_update"
-     WALLPAPER_FOLDER_PATH="/Users/your-username/Pictures/Bing Wallpapers"
-     ```
-
-3. **Make Sure the Script is Executable**
-
-   ```bash
-   chmod +x ~/Library/Scripts/change_wallpaper.sh
-   ```
-
-4. **Load the Launch Agent**
-
-   This tells macOS to start watching for when to run the script:
-
-   ```bash
-   launchctl load ~/Library/LaunchAgents/com.user.wallpaper-change.plist
-   ```
-
-   To verify it's running:
-   ```bash
-   launchctl list | grep wallpaper-change
-   ```
-
----
-
-## ✅ Notes
-
-- The script ensures the wallpaper is changed **only once per day**, even if the Mac wakes up multiple times.
-- If you want to test it manually:
+- macOS
+- `curl` (pre-installed)
+- [`jq`](https://stedolan.github.io/jq/) — install with:
   ```bash
-  bash ~/Library/Scripts/change_wallpaper.sh
+  brew install jq
   ```
+
+---
+
+## 🛠 Installation
+
+### 1. Clone this repository
+```bash
+git clone https://github.com/giupb/bing-wallpaper-updater.git
+cd bing-wallpaper-updater
+```
+
+### 2. Copy the script
+```bash
+mkdir -p ~/Scripts
+cp update_bing_wallpaper.sh ~/Scripts/
+chmod +x ~/Scripts/update_bing_wallpaper.sh
+```
+
+📸 Optional: Test it manually
+
+You can manually run the script to see if it works:
+```bash
+bash ~/Scripts/update_bing_wallpaper.sh
+```
+
+---
+
+### 3. Copy and configure the LaunchAgent plist
+```bash
+cp com.github.giupb.bing-wallpaper-updater.plist ~/Library/LaunchAgents/
+```
+
+Then edit the `.plist` to point to your script:
+```xml
+<string>/Users/YOUR_USERNAME/Scripts/update_bing_wallpaper.sh</string>
+```
+> Replace `YOUR_USERNAME` with your actual macOS username.
+
+---
+
+## 📅 Schedule the script with launchd
+
+### Load the job:
+```bash
+launchctl load ~/Library/LaunchAgents/com.github.giu.bingwallpaper.plist
+```
+
+### Unload if needed:
+```bash
+launchctl unload ~/Library/LaunchAgents/com.github.giu.bingwallpaper.plist
+```
+
+---
+
+## 📂 Folder Structure
+- The downloaded wallpapers are saved in:
+  ```
+  ~/Pictures/Bing Wallpapers
+  ```
+- A `.last_wallpaper_update` file is used to prevent re-downloading the same wallpaper in a single day.
+
+---
+
+## 🐞 Logs
+By default, standard output and errors are written to:
+```bash
+/tmp/bingwallpaper.out
+/tmp/bingwallpaper.err
+```
 
 ---
 
